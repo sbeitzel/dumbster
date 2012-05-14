@@ -17,9 +17,9 @@ public class Retrieve implements Action {
         try {
             ix = Integer.parseInt(argument.trim());
         } catch (Exception ex) {
-            ix = -1;
+            ix = 0;
         }
-        _index = ix;
+        _index = ix-1;
     }
 
     @Override

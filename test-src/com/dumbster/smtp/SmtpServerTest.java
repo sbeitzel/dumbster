@@ -56,6 +56,7 @@ public class SmtpServerTest {
     @Before
     public void setup() {
         server = SmtpServerFactory.startServer(SMTP_PORT);
+        server.setMailStore(new FixedSizeMailStore(20));
     }
 
     @After

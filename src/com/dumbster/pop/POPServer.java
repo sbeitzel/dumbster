@@ -104,9 +104,18 @@ public class POPServer implements Runnable {
         return _stopped;
     }
 
+    public void stop() {
+        _stopped = true;
+        try {
+            _serverSocket.close();
+            _serverSocket = null;
+        } catch (IOException ignored) {
+        }
+    }
+
     /**
-     * Toggles if the SMTP server is single or multi-threaded for response to
-     * SMTP sessions.
+     * Toggles if the POP3 server is single or multi-threaded for response to
+     * POP3 sessions.
      *
      * @param threaded whether or not to allow multiple simultaneous connections
      */
@@ -129,5 +138,14 @@ public class POPServer implements Runnable {
 
     public void setMailStore(MailStore mailStore) {
         _mailstore = mailStore;
+    }
+
+    /**
+     * Accessor for the mailstore. Intended to make testing easier.
+     *
+     * @return the current mailstore
+     */
+    public MailStore getMailstore() {
+        return _mailstore;
     }
 }

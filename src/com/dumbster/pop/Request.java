@@ -48,7 +48,6 @@ public class Request {
         return _action.response(_state, ms);
     }
     
-    @SuppressWarnings("SuspiciousIndentAfterControlStatement")
     private static Action parseInput(POPState currentState, String inputLine) {
         String ucLine = inputLine.toUpperCase();
         switch (currentState) {

@@ -36,7 +36,7 @@ public class UIDList implements Action {
             // we have an argument
             try {
                 int ix = Integer.parseInt(_argument);
-                MailMessage msg = mailStore.getMessage(ix);
+                MailMessage msg = mailStore.getMessage(ix-1);
                 if (msg != null) {
                     sb.append(ix).append(" ").append(msg.getUID()).append("\r\n.\r\n");
                     return new Response(Response.OK, sb.toString(), POPState.TRANSACTION);
@@ -50,7 +50,7 @@ public class UIDList implements Action {
             sb.append("\r\n");
             MailMessage [] allMessages = mailStore.getMessages();
             for (int ix = 0; ix < allMessages.length; ix++) {
-                sb.append(ix).append(" ").append(allMessages[ix].getUID()).append("\r\n");
+                sb.append(ix+1).append(" ").append(allMessages[ix].getUID()).append("\r\n");
             }
             sb.append(".\r\n");
             return new Response(Response.OK, sb.toString(), POPState.TRANSACTION);
