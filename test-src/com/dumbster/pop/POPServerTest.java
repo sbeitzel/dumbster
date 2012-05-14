@@ -1,11 +1,6 @@
 package com.dumbster.pop;
 
-import javax.mail.Flags;
-import javax.mail.Folder;
-import javax.mail.Message;
-import javax.mail.MessagingException;
-import javax.mail.Session;
-import javax.mail.Store;
+import javax.mail.*;
 import java.util.Properties;
 
 import com.dumbster.smtp.FixedSizeMailStore;
@@ -97,13 +92,79 @@ public class POPServerTest {
     }
 
     @Test
-    public void testUIDL() throws Exception {
-        Assert.fail("Not implemented");
+    public void testUIDLSingle() throws Exception {
+        _server.getMailstore().addMessage(createMessage("recipient@destination.net",
+                "tester@sender.org",
+                "test message",
+                "Message body with multiple\r\nlines of text.\r\n.6 percent\r\n"));
+        _server.getMailstore().addMessage(createMessage("recipient@destination.net",
+                "tester@sender.org",
+                "second test message",
+                "More email!\r\n"));
+        Store store = connect();
+        Folder inbox = store.getFolder("INBOX");
+        inbox.open(Folder.READ_WRITE);
+
+        Message[] messages = inbox.getMessages();
+        com.sun.mail.pop3.POP3Folder pf =
+                    (com.sun.mail.pop3.POP3Folder)inbox;
+        pf.getUID(messages[0]);
+
+//        FetchProfile fp = new FetchProfile();
+//        fp.add(UIDFolder.FetchProfileItem.UID);
+//        pf.fetch(pf.getMessages(), fp);
+
+        inbox.close(true);
+        store.close();
+        _server.getMailstore().clearMessages();
+    }
+
+    @Test
+    public void testUIDLAll() throws Exception {
+        _server.getMailstore().addMessage(createMessage("recipient@destination.net",
+                "tester@sender.org",
+                "test message",
+                "Message body with multiple\r\nlines of text.\r\n.6 percent\r\n"));
+        _server.getMailstore().addMessage(createMessage("recipient@destination.net",
+                "tester@sender.org",
+                "second test message",
+                "More email!\r\n"));
+        Store store = connect();
+        Folder inbox = store.getFolder("INBOX");
+
+        com.sun.mail.pop3.POP3Folder pf =
+                (com.sun.mail.pop3.POP3Folder)inbox;
+
+        pf.open(Folder.READ_WRITE);
+        FetchProfile fp = new FetchProfile();
+        fp.add(UIDFolder.FetchProfileItem.UID);
+        pf.fetch(pf.getMessages(), fp);
+
+        inbox.close(true);
+        store.close();
+        _server.getMailstore().clearMessages();
     }
 
     @Test
     public void testList() throws Exception {
-        Assert.fail("Not implemented");
+        _server.getMailstore().addMessage(createMessage("recipient@destination.net",
+                "tester@sender.org",
+                "test message",
+                "Message body with multiple\r\nlines of text.\r\n.6 percent\r\n"));
+        _server.getMailstore().addMessage(createMessage("recipient@destination.net",
+                "tester@sender.org",
+                "second test message",
+                "More email!\r\n"));
+        Store store = connect();
+        Folder inbox = store.getFolder("INBOX");
+        inbox.open(Folder.READ_WRITE);
+        com.sun.mail.pop3.POP3Folder pf = (com.sun.mail.pop3.POP3Folder)inbox;
+
+        int [] sizes = pf.getSizes();
+
+        inbox.close(true);
+        store.close();
+        _server.getMailstore().clearMessages();
     }
     
     private Store connect() throws MessagingException {
