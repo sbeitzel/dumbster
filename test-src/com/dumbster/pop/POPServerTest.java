@@ -95,6 +95,16 @@ public class POPServerTest {
         store.close();
         _server.getMailstore().clearMessages();
     }
+
+    @Test
+    public void testUIDL() throws Exception {
+        Assert.fail("Not implemented");
+    }
+
+    @Test
+    public void testList() throws Exception {
+        Assert.fail("Not implemented");
+    }
     
     private Store connect() throws MessagingException {
         Properties props = new Properties();

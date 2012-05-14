@@ -99,6 +99,7 @@ limitations under the License.
                debuglevel="lines,vars,source">
             <classpath refid="compile.path"/>
             <include name="com/dumbster/smtp/"/>
+            <include name="com/dumbster/pop/"/>
         </javac>
     </target>
 
@@ -129,6 +130,7 @@ limitations under the License.
             <batchtest fork="yes" todir="${testcompiledir}">
                 <fileset dir="${testsrcdir}">
                     <include name="**/*Test.java"/>
+                    <exclude name="**/AbstractMailStoreTest.java"/>
                 </fileset>
             </batchtest>
         </junit>
