@@ -32,7 +32,7 @@ public class POPServerTest {
 
     @Test
     public void loginAndQuit() throws Exception {
-        Store store = connect();
+        Store store = connect(false);
     
         Folder inbox = store.getFolder("INBOX");
         if (inbox == null) {
@@ -44,6 +44,19 @@ public class POPServerTest {
         store.close();
 
     }
+    
+    @Test
+    public void testAPOP() throws Exception {
+        Store store = connect(true);
+        Folder inbox = store.getFolder("INBOX");
+        if (inbox == null) {
+          Assert.fail("POP should have an inbox");
+        }
+        inbox.open(Folder.READ_ONLY);
+
+        inbox.close(false);
+        store.close();
+    }
 
     @Test
     public void retrieveAndDelete() throws Exception {
@@ -51,7 +64,7 @@ public class POPServerTest {
                                                         "tester@sender.org",
                                                         "test message",
                                                         "Message body with multiple\r\nlines of text.\r\n.6 percent\r\n"));
-        Store store = connect();
+        Store store = connect(false);
         Folder inbox = store.getFolder("INBOX");
         inbox.open(Folder.READ_WRITE);
         int messageCount = inbox.getMessageCount();
@@ -72,7 +85,7 @@ public class POPServerTest {
                                                         "tester@sender.org",
                                                         "test message",
                                                         "Message body with multiple\r\nlines of text.\r\n.6 percent\r\n"));
-        Store store = connect();
+        Store store = connect(false);
         Folder inbox = store.getFolder("INBOX");
         inbox.open(Folder.READ_WRITE);
         int messageCount = inbox.getMessageCount();
@@ -101,7 +114,7 @@ public class POPServerTest {
                 "tester@sender.org",
                 "second test message",
                 "More email!\r\n"));
-        Store store = connect();
+        Store store = connect(false);
         Folder inbox = store.getFolder("INBOX");
         inbox.open(Folder.READ_WRITE);
 
@@ -109,10 +122,6 @@ public class POPServerTest {
         com.sun.mail.pop3.POP3Folder pf =
                     (com.sun.mail.pop3.POP3Folder)inbox;
         pf.getUID(messages[0]);
-
-//        FetchProfile fp = new FetchProfile();
-//        fp.add(UIDFolder.FetchProfileItem.UID);
-//        pf.fetch(pf.getMessages(), fp);
 
         inbox.close(true);
         store.close();
@@ -129,7 +138,7 @@ public class POPServerTest {
                 "tester@sender.org",
                 "second test message",
                 "More email!\r\n"));
-        Store store = connect();
+        Store store = connect(false);
         Folder inbox = store.getFolder("INBOX");
 
         com.sun.mail.pop3.POP3Folder pf =
@@ -155,20 +164,22 @@ public class POPServerTest {
                 "tester@sender.org",
                 "second test message",
                 "More email!\r\n"));
-        Store store = connect();
+        Store store = connect(false);
         Folder inbox = store.getFolder("INBOX");
         inbox.open(Folder.READ_WRITE);
         com.sun.mail.pop3.POP3Folder pf = (com.sun.mail.pop3.POP3Folder)inbox;
 
         int [] sizes = pf.getSizes();
+        Assert.assertEquals("LIST did not return the expected number of records", 2, sizes.length);
 
         inbox.close(true);
         store.close();
         _server.getMailstore().clearMessages();
     }
     
-    private Store connect() throws MessagingException {
+    private Store connect(boolean useApop) throws MessagingException {
         Properties props = new Properties();
+        props.setProperty("mail.pop3.apop.enable", String.valueOf(useApop));
 
         String host = "localhost";
         String username = "userName";
