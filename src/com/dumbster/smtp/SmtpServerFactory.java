@@ -2,6 +2,8 @@ package com.dumbster.smtp;
 
 import java.util.concurrent.Executors;
 
+import com.dumbster.util.Config;
+
 /**
  * User: rj
  * Date: Aug 28, 2011
@@ -26,6 +28,6 @@ public class SmtpServerFactory {
     }
 
     public static SmtpServer startServer() {
-        return startServer(SmtpServer.DEFAULT_SMTP_PORT);
+        return startServer(Config.DEFAULT_SMTP_PORT);
     }
 }

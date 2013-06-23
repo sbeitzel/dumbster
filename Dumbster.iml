@@ -9,6 +9,7 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="library" name="commons" level="project" />
     <orderEntry type="library" scope="TEST" name="lib" level="project" />
   </component>
 </module>

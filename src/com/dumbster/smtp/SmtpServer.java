@@ -21,16 +21,12 @@ import java.net.Socket;
 import java.io.IOException;
 import java.util.concurrent.*;
 
+import com.dumbster.util.Config;
+
 /**
  * Dummy SMTP server for testing purposes.
  */
 public class SmtpServer implements Runnable {
-    public static final String PROP_NUM_THREADS = "dumbster.numThreads";
-    public static final String DEFAULT_THREADS = "1"; // as implemented by rjo
-
-    public static final int DEFAULT_SMTP_PORT = 25;
-    private static final int SERVER_SOCKET_TIMEOUT = 5000;
-    private static final int MAX_THREADS = 10;
 
     private volatile MailStore mailStore = new NullMailStore();
     private volatile boolean stopped = true;
@@ -44,17 +40,7 @@ public class SmtpServer implements Runnable {
 
     SmtpServer(int port) {
         this.port = port;
-        String configThreads = System.getProperty(PROP_NUM_THREADS, DEFAULT_THREADS);
-        try {
-            threadCount = Integer.parseInt(configThreads);
-            threadCount = Math.max(threadCount, 1);
-            if (threadCount > MAX_THREADS) {
-                threadCount = MAX_THREADS;
-            }
-        } catch (Exception e) {
-            e.printStackTrace(System.err);
-            threadCount = Integer.parseInt(DEFAULT_THREADS);
-        }
+        this.threadCount = Config.getConfig().getNumSMTPThreads();
         executor = new ThreadPoolExecutor(threadCount, threadCount, 5, TimeUnit.MILLISECONDS, new LinkedBlockingDeque<Runnable>());
     }
 
@@ -84,7 +70,7 @@ public class SmtpServer implements Runnable {
 
     private void initializeServerSocket() throws Exception {
         serverSocket = new ServerSocket(port);
-        serverSocket.setSoTimeout(SERVER_SOCKET_TIMEOUT);
+        serverSocket.setSoTimeout(Config.SERVER_SOCKET_TIMEOUT);
     }
 
     private void serverLoop() throws IOException {

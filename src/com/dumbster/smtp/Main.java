@@ -2,11 +2,12 @@ package com.dumbster.smtp;
 
 import com.dumbster.pop.POPServer;
 import com.dumbster.pop.POPServerFactory;
+import com.dumbster.util.Config;
 
 public class Main {
     public static void main(String[] args) {
         SmtpServer server;
-        int pt = SmtpServer.DEFAULT_SMTP_PORT;
+        int pt = Config.DEFAULT_SMTP_PORT;
         if (args.length > 0) {
             pt = port(args[0]);
         }

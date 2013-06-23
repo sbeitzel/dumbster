@@ -9,8 +9,8 @@ import java.util.concurrent.TimeUnit;
 
 import com.dumbster.smtp.MailStore;
 import com.dumbster.smtp.NullMailStore;
-import com.dumbster.smtp.SmtpServer;
 import com.dumbster.smtp.SocketWrapper;
+import com.dumbster.util.Config;
 
 public class POPServer implements Runnable {
     public static final int DEFAULT_POP_PORT = 110;
@@ -30,17 +30,7 @@ public class POPServer implements Runnable {
 
     POPServer(int port) {
         _port = port;
-        String configThreads = System.getProperty(SmtpServer.PROP_NUM_THREADS, SmtpServer.DEFAULT_THREADS);
-        try {
-            _threadCount = Integer.parseInt(configThreads);
-            _threadCount = Math.max(_threadCount, 1);
-            if (_threadCount > MAX_THREADS) {
-                _threadCount = MAX_THREADS;
-            }
-        } catch (Exception e) {
-            e.printStackTrace(System.err);
-            _threadCount = Integer.parseInt(SmtpServer.DEFAULT_THREADS);
-        }
+        _threadCount = Config.getConfig().getNumPOPThreads();
         // It would probably be nice if the thread factory named the threads things like, "POP thread xx"
         _executor = new ThreadPoolExecutor(_threadCount, _threadCount, 5, TimeUnit.MILLISECONDS, new LinkedBlockingDeque<Runnable>());
     }
