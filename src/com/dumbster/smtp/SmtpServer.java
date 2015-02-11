@@ -38,6 +38,12 @@ public class SmtpServer implements Runnable {
     private ThreadPoolExecutor executor = null;
     private int threadCount = 1;
 
+    SmtpServer() {
+        this.port = 25;
+        this.threadCount = 10;
+        executor = new ThreadPoolExecutor(threadCount, threadCount, 5, TimeUnit.MILLISECONDS, new LinkedBlockingDeque<Runnable>());
+    }
+
     SmtpServer(int port) {
         this.port = port;
         this.threadCount = Config.getConfig().getNumSMTPThreads();
@@ -164,5 +170,9 @@ public class SmtpServer implements Runnable {
 
     public void clearMessages() {
         this.mailStore.clearMessages();
+    }
+
+    public void setPort(int port) {
+        this.port = port;
     }
 }

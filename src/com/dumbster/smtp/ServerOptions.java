@@ -1,6 +1,7 @@
 package com.dumbster.smtp;
 
 import com.dumbster.smtp.mailstores.RollingMailStore;
+import com.dumbster.util.Config;
 
 /**
  * User: rj
@@ -8,7 +9,7 @@ import com.dumbster.smtp.mailstores.RollingMailStore;
  * Time: 5:35 AM
  */
 public class ServerOptions {
-    public int port = SmtpServer.DEFAULT_SMTP_PORT;
+    public int port = Config.DEFAULT_SMTP_PORT;
     public boolean threaded = true;
     public MailStore mailStore = new RollingMailStore();
     public boolean valid = true;

@@ -6,30 +6,40 @@ import com.dumbster.util.Config;
 
 public class Main {
     public static void main(String[] args) {
-        SmtpServer server;
-        int pt = Config.DEFAULT_SMTP_PORT;
-        if (args.length > 0) {
-            pt = port(args[0]);
+        ServerOptions serverOptions = new ServerOptions(args);
+        if (shouldShowHelp(args) || !serverOptions.valid) {
+            showHelp();
+            System.exit(1);
         }
-        server = SmtpServerFactory.startServer(pt);
-        FixedSizeMailStore store = new FixedSizeMailStore(50);
-        server.setMailStore(store);
-        server.setThreaded(true);
-        System.out.println("Dumbster SMTP Server started on port "+pt+"\n");
-        // Start up the POP3 server as well
-        POPServer pserver;
-        pt = POPServer.DEFAULT_POP_PORT;
-        if (args.length > 1) {
-            pt = port(args[1]);
-        }
-        pserver = POPServerFactory.startServer(pt);
-        pserver.setMailStore(store);
-        pserver.setThreaded(true);
-        System.out.println("Dumbster POP3 Server started on port "+pt+"\n");
+
+        SmtpServerFactory.startServer(serverOptions);
+        // TODO wire in the POP server
     }
 
-    private static int port(String s)  {
-        return Integer.parseInt(s);
+    private static boolean shouldShowHelp(String[] args) {
+        if (args.length == 0)
+            return false;
+        for (String arg : args) {
+            if ("--help".equalsIgnoreCase(arg) || "-h".equalsIgnoreCase(arg))
+                return true;
+        }
+        return false;
+    }
+
+    private static void showHelp() {
+        System.out.println();
+        System.out.println("Dumbster Fake SMTP Server");
+        System.out.println("usage: java -jar dumbster.jar [options] [port]");
+        System.out.println("Starts the SMTP server in the given port. Default port is 25.");
+        System.out.println();
+        System.out.println("Options:");
+        System.out.println("\t-h, --help this message");
+        System.out.println("\t--mailStore=EMLMailMessage Use a file-based mail store");
+        System.out.println("MailStores:");
+        System.out.println("\tRollingMailStore (Default)  Store messages in memory. Only the last 100 messages will be kept in memory");
+        System.out.println("\tEMLMailStore Save messages in EML files");
+        System.out.println();
+        System.out.println("\t--threaded=false Forces the SMTP server to be single-threaded.");
     }
 
 }
