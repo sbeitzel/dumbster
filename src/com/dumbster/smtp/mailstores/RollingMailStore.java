@@ -1,4 +1,7 @@
-package com.dumbster.smtp;
+package com.dumbster.smtp.mailstores;
+
+import com.dumbster.smtp.MailMessage;
+import com.dumbster.smtp.MailStore;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -17,6 +20,7 @@ public class RollingMailStore implements MailStore {
     }
 
     public void addMessage(MailMessage message) {
+        System.out.println("\n\nReceived message:\n" + message);
         receivedMail.add(message);
         if (getEmailCount() > 100) {
             receivedMail.remove(0);
