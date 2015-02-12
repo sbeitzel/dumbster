@@ -10,6 +10,7 @@ import com.dumbster.util.Config;
  */
 public class ServerOptions {
     public int port = Config.DEFAULT_SMTP_PORT;
+    public int pop3port = 0;
     public boolean threaded = true;
     public MailStore mailStore = new RollingMailStore();
     public boolean valid = true;
@@ -37,6 +38,18 @@ public class ServerOptions {
                 }
             } else if (argument.startsWith("--threaded")) {
                 this.threaded = !argument.equalsIgnoreCase("--threaded=false");
+            } else if (argument.startsWith("--pop3")) {
+                String[] values = argument.split("=");
+                if (values.length != 2) {
+                    this.valid = false;
+                    return;
+                }
+                try {
+                    this.pop3port = Integer.parseInt(values[1]);
+                } catch (Exception e) {
+                    this.valid=false;
+                    return;
+                }
             } else {
                 try {
                     this.port = Integer.parseInt(argument);

@@ -1,7 +1,10 @@
-package com.dumbster.smtp;
+package com.dumbster.smtp.mailstores;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import com.dumbster.smtp.MailMessage;
+import com.dumbster.smtp.MailStore;
 
 /**
  * A mail store with a fixed maximum number of messages it can hold and

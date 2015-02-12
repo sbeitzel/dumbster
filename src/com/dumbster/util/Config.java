@@ -7,6 +7,7 @@ import org.apache.commons.configuration.CompositeConfiguration;
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.PropertiesConfiguration;
 import org.apache.commons.configuration.SystemConfiguration;
+import org.apache.log4j.Logger;
 
 /**
  * Central class to hold all the configuration of the server.
@@ -14,8 +15,13 @@ import org.apache.commons.configuration.SystemConfiguration;
  * @author Stephen Beitzel &lt;sbeitzel@pobox.com&gt;
  */
 public class Config {
+    private static final Logger __l = Logger.getLogger(Config.class);
+
     private static final Config CURRENT_CONFIG = new Config();
+
     public static final int DEFAULT_SMTP_PORT = 25;
+    public static final int DEFAULT_POP_PORT = 110;
+
     public static final int SERVER_SOCKET_TIMEOUT = 5000;
     public static final int MAX_THREADS = 10;
     public static final String PROP_NUM_THREADS = "dumbster.numThreads";
@@ -32,7 +38,7 @@ public class Config {
         try {
             _config.addConfiguration(new PropertiesConfiguration("dumbster.properties"));
         } catch (ConfigurationException e) {
-            System.out.println("dumbster.properties not loaded");
+            __l.warn("dumbster.properties not loaded");
         }
     }
     

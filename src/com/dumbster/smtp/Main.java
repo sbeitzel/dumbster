@@ -1,8 +1,6 @@
 package com.dumbster.smtp;
 
-import com.dumbster.pop.POPServer;
 import com.dumbster.pop.POPServerFactory;
-import com.dumbster.util.Config;
 
 public class Main {
     public static void main(String[] args) {
@@ -13,7 +11,7 @@ public class Main {
         }
 
         SmtpServerFactory.startServer(serverOptions);
-        // TODO wire in the POP server
+        POPServerFactory.startServer(serverOptions);
     }
 
     private static boolean shouldShowHelp(String[] args) {
@@ -38,8 +36,10 @@ public class Main {
         System.out.println("MailStores:");
         System.out.println("\tRollingMailStore (Default)  Store messages in memory. Only the last 100 messages will be kept in memory");
         System.out.println("\tEMLMailStore Save messages in EML files");
+        System.out.println("\tFixedSizeMailStore Store messages in memory with a configurable number of slots");
         System.out.println();
         System.out.println("\t--threaded=false Forces the SMTP server to be single-threaded.");
+        System.out.println("\t--pop3=[port] Starts a POP3 server on the specified port.");
     }
 
 }

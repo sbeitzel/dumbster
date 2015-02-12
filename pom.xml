@@ -3,22 +3,22 @@
 
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>org.github.rjo1970</groupId>
+    <groupId>org.github.sbeitzel</groupId>
     <artifactId>dumbster</artifactId>
     <packaging>jar</packaging>
-    <version>1.9.0.2-SNAPSHOT</version>
+    <version>1.9.0.3-SNAPSHOT</version>
 
     <name>Dumbster</name>
     <description>
          fake SMTP server
     </description>
 
-    <url>https://github.com/rjo1970/dumbster</url>
+    <url>https://github.com/sbeitzel/dumbster</url>
 
     <scm>
-        <url>https://github.com/rjo1970/dumbster</url>
-        <connection>scm:git:https://github.com/rjo1970/dumbster.git</connection>
-        <developerConnection>scm:git:${githubUserAndHost}:rjo1970/dumbster.git</developerConnection>
+        <url>https://github.com/sbeitzel/dumbster</url>
+        <connection>scm:git:https://github.com/sbeitzel/dumbster.git</connection>
+        <developerConnection>scm:git:${githubUserAndHost}:sbeitzel/dumbster.git</developerConnection>
     </scm>
 
     <licenses>
@@ -46,7 +46,7 @@
 
         <site>
             <id>github-project-site</id>
-            <url>gitsite:${githubUserAndHost}/rjo1970/dumbster</url>
+            <url>gitsite:${githubUserAndHost}/sbeitzel/dumbster</url>
         </site>
     </distributionManagement>
 
@@ -75,11 +75,31 @@
             <version>1.4.4</version>
             <scope>test</scope>
         </dependency>
+
+        <dependency>
+            <groupId>log4j</groupId>
+            <artifactId>log4j</artifactId>
+            <version>1.2.17</version>
+            <scope>compile</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>commons-configuration</groupId>
+            <artifactId>commons-configuration</artifactId>
+            <version>1.9</version>
+            <scope>compile</scope>
+        </dependency>
+
     </dependencies>
 
     <build>
         <sourceDirectory>${project.basedir}/src</sourceDirectory>
         <testSourceDirectory>${project.basedir}/test-src</testSourceDirectory>
+        <resources>
+            <resource>
+                <directory>${project.basedir}/resources</directory>
+            </resource>
+        </resources>
 
         <extensions>
             <extension>

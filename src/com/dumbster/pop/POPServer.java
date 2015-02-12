@@ -11,12 +11,12 @@ import com.dumbster.smtp.MailStore;
 import com.dumbster.smtp.NullMailStore;
 import com.dumbster.smtp.SocketWrapper;
 import com.dumbster.util.Config;
+import org.apache.log4j.Logger;
 
 public class POPServer implements Runnable {
-    public static final int DEFAULT_POP_PORT = 110;
+    private static final Logger __l = Logger.getLogger(POPServer.class);
 
     private static final int SERVER_SOCKET_TIMEOUT = 5000;
-    private static final int MAX_THREADS = 10;
 
     private volatile MailStore _mailstore = new NullMailStore();
     private volatile boolean _stopped = true;
@@ -44,6 +44,7 @@ public class POPServer implements Runnable {
         _stopped = false;
         try {
             initializeServerSocket();
+            __l.info("Dumbster POP3 server started on port "+_port);
             serverLoop();
         } catch (Exception e) {
             e.printStackTrace();

@@ -2,12 +2,15 @@ package com.dumbster.smtp.mailstores;
 
 import com.dumbster.smtp.MailMessage;
 import com.dumbster.smtp.MailStore;
+import org.apache.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 public class RollingMailStore implements MailStore {
+    private static final Logger __l = Logger.getLogger(RollingMailStore.class);
+
 
     private List<MailMessage> receivedMail;
 
@@ -20,7 +23,7 @@ public class RollingMailStore implements MailStore {
     }
 
     public void addMessage(MailMessage message) {
-        System.out.println("\n\nReceived message:\n" + message);
+        __l.info("\n\nReceived message:\n" + message);
         receivedMail.add(message);
         if (getEmailCount() > 100) {
             receivedMail.remove(0);
@@ -44,11 +47,8 @@ public class RollingMailStore implements MailStore {
     public void deleteMessage(int index) {
         try {
             receivedMail.remove(index);
-        } catch (IndexOutOfBoundsException iob) {
-            // oh, well
-        } catch (UnsupportedOperationException uo) {
-            // that's kind of surprising
-            uo.printStackTrace(System.err);
+        } catch (Exception e) {
+            __l.error("Exception deleting message", e);
         }
     }
 }

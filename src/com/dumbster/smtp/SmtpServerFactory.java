@@ -3,6 +3,7 @@ package com.dumbster.smtp;
 import java.util.concurrent.Executors;
 
 import com.dumbster.util.Config;
+import org.apache.log4j.Logger;
 
 /**
  * User: rj
@@ -10,6 +11,8 @@ import com.dumbster.util.Config;
  * Time: 6:48:14 AM
  */
 public class SmtpServerFactory {
+    private static final Logger __l = Logger.getLogger(SmtpServerFactory.class);
+
     public static SmtpServer startServer() {
         ServerOptions serverOptions = new ServerOptions();
         return startServer(serverOptions);
@@ -19,7 +22,7 @@ public class SmtpServerFactory {
         SmtpServer server = wireUpServer(options);
         wrapInShutdownHook(server);
         startServerThread(server);
-        System.out.println("Dumbster SMTP Server started on port " + options.port + ".\n");
+        __l.info("Dumbster SMTP Server started on port " + options.port + ".\n");
         return server;
     }
 
@@ -35,8 +38,8 @@ public class SmtpServerFactory {
         Runtime.getRuntime().addShutdownHook(new Thread() {
             public void run() {
                 server.stop();
-                System.out.println("\nDumbster SMTP Server stopped");
-                System.out.println("\tTotal messages received: " + server.getEmailCount());
+                __l.info("\nDumbster SMTP Server stopped");
+                __l.info("\tTotal messages received: " + server.getEmailCount());
             }
          });
     }

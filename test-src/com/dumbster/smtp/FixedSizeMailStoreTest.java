@@ -1,5 +1,6 @@
 package com.dumbster.smtp;
 
+import com.dumbster.smtp.mailstores.FixedSizeMailStore;
 import org.junit.Before;
 import org.junit.Test;
 

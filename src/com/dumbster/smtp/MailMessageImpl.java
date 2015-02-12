@@ -21,10 +21,9 @@ import java.util.*;
 /**
  * Container for a complete SMTP message - headers and message body.
  */
-public class MailMessageImpl implements MailMessage {
+public class MailMessageImpl extends AbstractMailMessage {
     private Map<String, List<String>> headers;
     private StringBuffer body;
-    private final UUID uuid = UUID.randomUUID();
 
     public MailMessageImpl() {
         headers = new HashMap<String, List<String>>(10);
@@ -76,10 +75,14 @@ public class MailMessageImpl implements MailMessage {
     @Override
     public void appendHeader(String name, String value) {
         List<String> values = headers.get(name);
-        String oldValue = values.get(values.size()-1);
-        values.remove(oldValue);
-        values.add(oldValue + value);
-        headers.put(name, values);
+        if (values != null) {
+            String oldValue = values.get(values.size() - 1);
+            values.remove(oldValue);
+            values.add(oldValue + value);
+            headers.put(name, values);
+        } else {
+            addHeader(name, value);
+        }
     }
 
     @Override
@@ -92,11 +95,6 @@ public class MailMessageImpl implements MailMessage {
 
     private boolean shouldPrependNewline(String line) {
         return body.length() > 0 && line.length() > 0 && !"\n".equals(line);
-    }
-
-    @Override
-    public String getUID() {
-        return uuid.toString();
     }
 
     @Override
@@ -117,31 +115,4 @@ public class MailMessageImpl implements MailMessage {
         return msg.toString();
     }
 
-    @Override
-    public String byteStuff() {
-        StringBuilder sb = new StringBuilder();
-        for (Map.Entry<String, List<String>> e : headers.entrySet()) {
-            String name = e.getKey();
-            sb.append(name).append(": ");
-            for (Iterator<String> viter = e.getValue().iterator(); viter.hasNext(); ) {
-                sb.append(viter.next());
-                if (viter.hasNext()) {
-                    sb.append(", ");
-                }
-            }
-            sb.append("\r\n");
-        }
-        sb.append("\r\n");
-        String body = getBody();
-
-        // headers are done, now it's time to build the body.
-//        POP3 says we're supposed to "byte stuff" any termination sequence (CRLF.CRLF) that appears in the message
-//        but when we do that then Apple's Mail doesn't un-stuff the dots. It may be that Mail is broken, but
-//        since that's what I'm using on my test system, I'm not bothered. I would LOVE if someone could point
-//        me to a comprehensible explanation of how this is really supposed to work.
-        sb.append(body.replaceAll("\\r\\n\\.(.)", "\r\n..$1"));
-        // finally, the termination sequence
-        sb.append("\r\n.\r\n");
-        return sb.toString();
-    }
 }

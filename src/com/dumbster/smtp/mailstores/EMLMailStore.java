@@ -12,6 +12,7 @@ import java.util.regex.Pattern;
 import com.dumbster.smtp.MailMessage;
 import com.dumbster.smtp.MailStore;
 import com.dumbster.smtp.eml.EMLMailMessage;
+import org.apache.log4j.Logger;
 
 /**
  * Store messages as EML files.
@@ -19,6 +20,7 @@ import com.dumbster.smtp.eml.EMLMailMessage;
  * The messages are stored in order but getMessages won't return messages in the same order they were received.
  */
 public class EMLMailStore implements MailStore {
+    private static final Logger __l = Logger.getLogger(EMLMailStore.class);
 
     private boolean initialized;
     private int count = 0;
@@ -59,7 +61,7 @@ public class EMLMailStore implements MailStore {
     private File[] loadMessageFiles() {
         File[] files = this.directory.listFiles(new EMLFilenameFilter());
         if (files == null) {
-            System.err.println("Unable to load messages from eml mailStore directory: " + directory);
+            __l.error("Unable to load messages from eml mailStore directory: " + directory);
             return new File[0];
         }
         return files;
@@ -83,7 +85,7 @@ public class EMLMailStore implements MailStore {
         count++;
         messages.add(message);
 
-        System.out.println("Received message: " + count);
+        __l.info("Received message: " + count);
 
         try {
             if (!directory.exists()) {
@@ -111,8 +113,7 @@ public class EMLMailStore implements MailStore {
             writer.close();
 
         } catch (Exception e) {
-            System.err.println(e.getMessage());
-            e.printStackTrace();
+            __l.error("Exception receiving message", e);
         }
     }
 
@@ -132,7 +133,7 @@ public class EMLMailStore implements MailStore {
     public MailMessage[] getMessages() {
         checkInitialized();
 
-        return messages.toArray(new MailMessage[0]);
+        return messages.toArray(new MailMessage[messages.size()]);
     }
 
     /**
@@ -153,6 +154,11 @@ public class EMLMailStore implements MailStore {
             count--;
         }
         messages.clear();
+    }
+
+    @Override
+    public void deleteMessage(int index) {
+        throw new UnsupportedOperationException("EMLMailStore does not support deleting single messages.");
     }
 
     public void setDirectory(String directory) {

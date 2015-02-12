@@ -6,6 +6,7 @@ import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.dumbster.smtp.AbstractMailMessage;
 import com.dumbster.smtp.MailMessage;
 import com.dumbster.smtp.MailMessageImpl;
 import com.dumbster.smtp.SmtpState;
@@ -16,7 +17,7 @@ import com.dumbster.smtp.SmtpState;
  * Each message is attached to a file but won't load the file until data is requested.<br/>
  * This object is detached from the original file, so changes made to this object won't reflect to the file automatically.
  */
-public class EMLMailMessage implements MailMessage {
+public class EMLMailMessage extends AbstractMailMessage {
 
     private static final Pattern PATTERN = Pattern.compile("(.*?): (.*)");
 

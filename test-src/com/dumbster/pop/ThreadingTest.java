@@ -1,6 +1,7 @@
 package com.dumbster.pop;
 
 import com.dumbster.smtp.*;
+import com.dumbster.smtp.mailstores.FixedSizeMailStore;
 import com.dumbster.util.Config;
 import junit.framework.Assert;
 import org.junit.After;
@@ -25,11 +26,14 @@ public class ThreadingTest {
     public void setup() {
         _originalPOPThreads = Config.getConfig().getNumPOPThreads();
         Config.getConfig().setNumPOPThreads(2);
-        _pserver = POPServerFactory.startServer(PORT_POP);
-        _pserver.setMailStore(new FixedSizeMailStore(10));
+        ServerOptions options = new ServerOptions();
+        options.pop3port = PORT_POP;
+        options.mailStore = new FixedSizeMailStore(10);
+        options.port=PORT_SMTP;
+        _pserver = POPServerFactory.startServer(options);
+
         _pserver.setThreaded(true);
-        _sserver = SmtpServerFactory.startServer(PORT_SMTP);
-        _sserver.setMailStore(_pserver.getMailstore());
+        _sserver = SmtpServerFactory.startServer(options);
         _sserver.setThreaded(true);
     }
 
