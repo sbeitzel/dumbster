@@ -21,6 +21,7 @@ import java.net.Socket;
 import java.io.IOException;
 import java.util.concurrent.*;
 
+import com.dumbster.smtp.mailstores.NullMailStore;
 import com.dumbster.util.Config;
 
 /**
@@ -31,7 +32,7 @@ public class SmtpServer implements Runnable {
     private volatile MailStore mailStore = new NullMailStore();
     private volatile boolean stopped = true;
     private volatile boolean ready = false;
-    private volatile boolean threaded = false;
+    private volatile boolean threaded = true;
 
     private ServerSocket serverSocket;
     private int port;
@@ -39,14 +40,11 @@ public class SmtpServer implements Runnable {
     private int threadCount = 1;
 
     SmtpServer() {
-        this.port = 25;
-        this.threadCount = 10;
-        executor = new ThreadPoolExecutor(threadCount, threadCount, 5, TimeUnit.MILLISECONDS, new LinkedBlockingDeque<Runnable>());
-    }
-
-    SmtpServer(int port) {
-        this.port = port;
-        this.threadCount = Config.getConfig().getNumSMTPThreads();
+        Config cfg = Config.getConfig();
+        this.port = cfg.getSMTPPort();
+        this.threadCount = cfg.getNumSMTPThreads();
+        this.mailStore = cfg.getMailStore();
+        this.threaded = this.threadCount>1;
         executor = new ThreadPoolExecutor(threadCount, threadCount, 5, TimeUnit.MILLISECONDS, new LinkedBlockingDeque<Runnable>());
     }
 

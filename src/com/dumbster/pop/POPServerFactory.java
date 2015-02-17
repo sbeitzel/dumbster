@@ -2,24 +2,19 @@ package com.dumbster.pop;
 
 import java.util.concurrent.Executors;
 
-import com.dumbster.smtp.ServerOptions;
+import com.dumbster.util.Config;
 import org.apache.log4j.Logger;
 
 public class POPServerFactory {
     private static final Logger __l = Logger.getLogger(POPServerFactory.class);
 
-    public static POPServer startServer(ServerOptions serverOptions) {
-        if (serverOptions.pop3port>0) {
-            POPServer server = new POPServer(serverOptions.pop3port);
-            server.setMailStore(serverOptions.mailStore);
-            server.setThreaded(serverOptions.threaded);
+    public static POPServer startServer() {
+        POPServer server = new POPServer();
 
-            wrapInShutdownHook(server);
-            __l.info("Dumbster POP3 Server started on port " + serverOptions.port + ".\n");
-            Executors.newSingleThreadExecutor().execute(server);
-            return whenReady(server);
-        }
-        return null;
+        wrapInShutdownHook(server);
+        __l.info("Dumbster POP3 Server started on port " + Config.getConfig().getPOP3Port() + ".\n");
+        Executors.newSingleThreadExecutor().execute(server);
+        return whenReady(server);
     }
 
     private static POPServer whenReady(POPServer server) {

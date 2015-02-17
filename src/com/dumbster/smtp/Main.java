@@ -1,17 +1,22 @@
 package com.dumbster.smtp;
 
 import com.dumbster.pop.POPServerFactory;
+import com.dumbster.util.Config;
 
 public class Main {
     public static void main(String[] args) {
-        ServerOptions serverOptions = new ServerOptions(args);
-        if (shouldShowHelp(args) || !serverOptions.valid) {
+        if (shouldShowHelp(args)) {
+            showHelp();
+            System.exit(1);
+        }
+        Config config = Config.getConfig();
+        if (!config.getIsValid()) {
             showHelp();
             System.exit(1);
         }
 
-        SmtpServerFactory.startServer(serverOptions);
-        POPServerFactory.startServer(serverOptions);
+        SmtpServerFactory.startServer();
+        POPServerFactory.startServer();
     }
 
     private static boolean shouldShowHelp(String[] args) {
@@ -27,19 +32,12 @@ public class Main {
     private static void showHelp() {
         System.out.println();
         System.out.println("Dumbster Fake SMTP Server");
-        System.out.println("usage: java -jar dumbster.jar [options] [port]");
-        System.out.println("Starts the SMTP server in the given port. Default port is 25.");
+        System.out.println("usage: java -jar dumbster.jar");
+        System.out.println("Starts the SMTP and POP3 servers on the default ports (25 and 110).");
         System.out.println();
-        System.out.println("Options:");
-        System.out.println("\t-h, --help this message");
-        System.out.println("\t--mailStore=EMLMailMessage Use a file-based mail store");
-        System.out.println("MailStores:");
-        System.out.println("\tRollingMailStore (Default)  Store messages in memory. Only the last 100 messages will be kept in memory");
-        System.out.println("\tEMLMailStore Save messages in EML files");
-        System.out.println("\tFixedSizeMailStore Store messages in memory with a configurable number of slots");
-        System.out.println();
-        System.out.println("\t--threaded=false Forces the SMTP server to be single-threaded.");
-        System.out.println("\t--pop3=[port] Starts a POP3 server on the specified port.");
+        System.out.println("To override defaults, define properties at invocation time or provide a");
+        System.out.println("file called 'dumbster.properties' in the classpath.");
+        System.out.println("To override logging behavior, provide a 'log4j.properties' file in the classpath.");
     }
 
 }

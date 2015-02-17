@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.dumbster.smtp.MailMessage;
 import com.dumbster.smtp.MailStore;
+import org.apache.commons.configuration.AbstractConfiguration;
 
 /**
  * A mail store with a fixed maximum number of messages it can hold and
@@ -12,9 +13,14 @@ import com.dumbster.smtp.MailStore;
  * for multithreaded access while still being reasonably fast.
  */
 public class FixedSizeMailStore implements MailStore {
+    public static final String PROP_MAXSIZE = "dumbster.FixedSizeMailStore.size";
 
     private final List<MailMessage> _messages = new ArrayList<MailMessage>();
     private final int _maxSize;
+
+    public FixedSizeMailStore(AbstractConfiguration config) {
+        _maxSize = config.getInt(PROP_MAXSIZE);
+    }
 
     public FixedSizeMailStore(int size) {
         _maxSize = size;

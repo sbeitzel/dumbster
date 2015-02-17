@@ -1,12 +1,19 @@
 package com.dumbster.pop;
 
-import javax.mail.*;
+import javax.mail.FetchProfile;
+import javax.mail.Flags;
+import javax.mail.Folder;
+import javax.mail.Message;
+import javax.mail.MessagingException;
+import javax.mail.Session;
+import javax.mail.Store;
+import javax.mail.UIDFolder;
 import java.util.Properties;
 
-import com.dumbster.smtp.ServerOptions;
-import com.dumbster.smtp.mailstores.FixedSizeMailStore;
 import com.dumbster.smtp.MailMessage;
 import com.dumbster.smtp.MailMessageImpl;
+import com.dumbster.smtp.mailstores.FixedSizeMailStore;
+import com.dumbster.util.Config;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -22,10 +29,10 @@ public class POPServerTest {
     
     @Before
     public void setup() {
-        ServerOptions options = new ServerOptions();
-        options.pop3port = PORT;
-        options.mailStore = new FixedSizeMailStore(10);
-        _server = POPServerFactory.startServer(options);
+        Config config = Config.getConfig();
+        config.setPOP3Port(PORT);
+        config.setMailStore(new FixedSizeMailStore(10));
+        _server = POPServerFactory.startServer();
     }
 
     @After

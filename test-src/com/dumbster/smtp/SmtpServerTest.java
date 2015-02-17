@@ -16,38 +16,49 @@
  */
 package com.dumbster.smtp;
 
-import org.junit.*;
-
-import com.dumbster.smtp.SmtpServer;
-
-import static org.junit.Assert.*;
-
 import javax.activation.DataHandler;
 import javax.activation.DataSource;
-import javax.mail.*;
-import javax.mail.internet.*;
-import java.util.Properties;
+import javax.mail.Message;
+import javax.mail.MessagingException;
+import javax.mail.Multipart;
+import javax.mail.Session;
+import javax.mail.Transport;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeBodyPart;
+import javax.mail.internet.MimeMessage;
+import javax.mail.internet.MimeMultipart;
 import java.util.Date;
+import java.util.Properties;
+
+import com.dumbster.smtp.mailstores.RollingMailStore;
+import com.dumbster.util.Config;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Ignore;
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 public class SmtpServerTest {
     private static final int SMTP_PORT = 1081;
 
     private SmtpServer server;
 
-    private final String SERVER = "localhost";
     private final String FROM = "sender@here.com";
     private final String TO = "receiver@there.com";
     private final String SUBJECT = "Test";
     private final String BODY = "Test Body";
-    private final String FileName = "license.txt";
 
     private final int WAIT_TICKS = 10000;
 
     @Before
     public void setup() {
-        ServerOptions options = new ServerOptions();
-        options.port = SMTP_PORT;
-        server = SmtpServerFactory.startServer(options);
+        final Config cfg = Config.getConfig();
+        cfg.setSMTPPort(SMTP_PORT);
+        cfg.setMailStore(new RollingMailStore());
+        server = SmtpServerFactory.startServer();
     }
 
     @After
@@ -75,12 +86,12 @@ public class SmtpServerTest {
     public void testClearMessages() {
         sendMessage(SMTP_PORT, FROM, SUBJECT, BODY, TO);
         server.anticipateMessageCountFor(1, WAIT_TICKS);
-        assertTrue(server.getEmailCount() == 1);
+        assertEquals(1, server.getEmailCount());
         sendMessage(SMTP_PORT, FROM, SUBJECT, BODY, TO);
         server.anticipateMessageCountFor(1, WAIT_TICKS);
-        assertTrue(server.getEmailCount() == 2);
+        assertEquals(2, server.getEmailCount());
         server.clearMessages();
-        assertTrue(server.getEmailCount() == 0);
+        assertEquals("", 0, server.getEmailCount());
     }
 
     @Test
@@ -186,9 +197,10 @@ public class SmtpServerTest {
 
     private MimeBodyPart buildFileAttachment() throws MessagingException {
         MimeBodyPart messageBodyPart = new MimeBodyPart();
-        DataSource source = new javax.activation.FileDataSource(FileName);
+        String fileName = "license.txt";
+        DataSource source = new javax.activation.FileDataSource(fileName);
         messageBodyPart.setDataHandler(new DataHandler(source));
-        messageBodyPart.setFileName(FileName);
+        messageBodyPart.setFileName(fileName);
         return messageBodyPart;
     }
 
@@ -222,6 +234,7 @@ public class SmtpServerTest {
 
             try {
                 transport = session.getTransport("smtp");
+                String SERVER = "localhost";
                 transport.connect(SERVER, SMTP_PORT, "ddd", "ddd");
                 transport.sendMessage(msg, InternetAddress.parse(TO, false));
                 transport.sendMessage(msg, InternetAddress.parse("dimiter.bakardjiev@musala.com", false));

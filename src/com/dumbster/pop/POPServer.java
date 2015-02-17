@@ -8,7 +8,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import com.dumbster.smtp.MailStore;
-import com.dumbster.smtp.NullMailStore;
+import com.dumbster.smtp.mailstores.NullMailStore;
 import com.dumbster.smtp.SocketWrapper;
 import com.dumbster.util.Config;
 import org.apache.log4j.Logger;
@@ -21,16 +21,19 @@ public class POPServer implements Runnable {
     private volatile MailStore _mailstore = new NullMailStore();
     private volatile boolean _stopped = true;
     private volatile boolean _ready = false;
-    private volatile boolean _threaded = false;
+    private volatile boolean _threaded = true;
 
     private ServerSocket _serverSocket;
     private int _port;
     private ThreadPoolExecutor _executor = null;
     private int _threadCount = 1;
 
-    POPServer(int port) {
-        _port = port;
-        _threadCount = Config.getConfig().getNumPOPThreads();
+    POPServer() {
+        Config cfg = Config.getConfig();
+        _port = cfg.getPOP3Port();
+        _threadCount = cfg.getNumPOPThreads();
+        _mailstore = cfg.getMailStore();
+        _threaded = _threadCount>1;
         // It would probably be nice if the thread factory named the threads things like, "POP thread xx"
         _executor = new ThreadPoolExecutor(_threadCount, _threadCount, 5, TimeUnit.MILLISECONDS, new LinkedBlockingDeque<Runnable>());
     }

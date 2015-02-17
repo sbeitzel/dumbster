@@ -1,7 +1,5 @@
 package com.dumbster.smtp;
 
-import java.util.concurrent.Executors;
-
 import com.dumbster.util.Config;
 import org.apache.log4j.Logger;
 
@@ -14,23 +12,10 @@ public class SmtpServerFactory {
     private static final Logger __l = Logger.getLogger(SmtpServerFactory.class);
 
     public static SmtpServer startServer() {
-        ServerOptions serverOptions = new ServerOptions();
-        return startServer(serverOptions);
-    }
-
-    public static SmtpServer startServer(ServerOptions options) {
-        SmtpServer server = wireUpServer(options);
+        SmtpServer server = new SmtpServer();
         wrapInShutdownHook(server);
         startServerThread(server);
-        __l.info("Dumbster SMTP Server started on port " + options.port + ".\n");
-        return server;
-    }
-
-    private static SmtpServer wireUpServer(ServerOptions options) {
-        SmtpServer server = new SmtpServer();
-        server.setPort(options.port);
-        server.setThreaded(options.threaded);
-        server.setMailStore(options.mailStore);
+        __l.info("Dumbster SMTP Server started on port " + Config.getConfig().getSMTPPort() + ".\n");
         return server;
     }
 
@@ -41,7 +26,7 @@ public class SmtpServerFactory {
                 __l.info("\nDumbster SMTP Server stopped");
                 __l.info("\tTotal messages received: " + server.getEmailCount());
             }
-         });
+        });
     }
 
     private static void startServerThread(SmtpServer server) {
@@ -57,22 +42,5 @@ public class SmtpServerFactory {
             } catch (InterruptedException ignored) {
             }
         }
-    }
-
-    public static SmtpServer startServer(int port) {
-        SmtpServer server = new SmtpServer(port);
-        Executors.newSingleThreadExecutor().execute(server);
-        return whenReady(server);
-    }
-
-    private static SmtpServer whenReady(SmtpServer server) {
-        while (!server.isReady()) {
-            try {
-                Thread.sleep(1);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
-        return server;
     }
 }

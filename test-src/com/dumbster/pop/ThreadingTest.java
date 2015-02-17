@@ -21,27 +21,41 @@ public class ThreadingTest {
     private POPServer _pserver;
     private SmtpServer _sserver;
     private int _originalPOPThreads;
+    private int _originalSMTPThreads;
+    private int _originalPOPPort;
+    private int _originalSMTPPort;
+    private MailStore _originalMailStore;
 
     @Before
     public void setup() {
-        _originalPOPThreads = Config.getConfig().getNumPOPThreads();
-        Config.getConfig().setNumPOPThreads(2);
-        ServerOptions options = new ServerOptions();
-        options.pop3port = PORT_POP;
-        options.mailStore = new FixedSizeMailStore(10);
-        options.port=PORT_SMTP;
-        _pserver = POPServerFactory.startServer(options);
+        final Config cfg = Config.getConfig();
+        _originalPOPThreads = cfg.getNumPOPThreads();
+        _originalSMTPThreads = cfg.getNumSMTPThreads();
+        _originalPOPPort = cfg.getPOP3Port();
+        _originalSMTPPort = cfg.getSMTPPort();
+        _originalMailStore = cfg.getMailStore();
 
-        _pserver.setThreaded(true);
-        _sserver = SmtpServerFactory.startServer(options);
-        _sserver.setThreaded(true);
+        cfg.setNumPOPThreads(2);
+        cfg.setPOP3Port(PORT_POP);
+        cfg.setMailStore(new FixedSizeMailStore(10));
+        cfg.setSMTPPort(PORT_SMTP);
+        cfg.setNumSMTPThreads(2);
+
+        _pserver = POPServerFactory.startServer();
+
+        _sserver = SmtpServerFactory.startServer();
     }
 
     @After
     public void shutdown() {
         _pserver.stop();
         _sserver.stop();
-        Config.getConfig().setNumPOPThreads(_originalPOPThreads);
+        final Config cfg = Config.getConfig();
+        cfg.setNumPOPThreads(_originalPOPThreads);
+        cfg.setNumSMTPThreads(_originalSMTPThreads);
+        cfg.setPOP3Port(_originalPOPPort);
+        cfg.setSMTPPort(_originalSMTPPort);
+        cfg.setMailStore(_originalMailStore);
     }
 
     @Test
@@ -100,14 +114,5 @@ public class ThreadingTest {
         mailProps.setProperty("mail.smtp.port", "" + PORT_SMTP);
         mailProps.setProperty("mail.smtp.sendpartial", "true");
         return Session.getDefaultInstance(mailProps, null);
-    }
-
-    MailMessage createMessage(String to, String from, String subject, String body) {
-        MailMessage msg = new MailMessageImpl();
-        msg.addHeader("To", to);
-        msg.addHeader("From", from);
-        msg.addHeader("Subject", subject);
-        msg.appendBody(body);
-        return msg;
     }
 }
