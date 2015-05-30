@@ -11,10 +11,11 @@ import com.dumbster.smtp.MailStore;
 import com.dumbster.smtp.mailstores.NullMailStore;
 import com.dumbster.smtp.SocketWrapper;
 import com.dumbster.util.Config;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class POPServer implements Runnable {
-    private static final Logger __l = Logger.getLogger(POPServer.class);
+    private static final Logger __l = LoggerFactory.getLogger(POPServer.class);
 
     private static final int SERVER_SOCKET_TIMEOUT = 5000;
 

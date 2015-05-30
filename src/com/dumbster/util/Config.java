@@ -12,7 +12,8 @@ import org.apache.commons.configuration.CompositeConfiguration;
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.PropertiesConfiguration;
 import org.apache.commons.configuration.SystemConfiguration;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Central class to hold all the configuration of the server.
@@ -20,7 +21,7 @@ import org.apache.log4j.Logger;
  * @author Stephen Beitzel &lt;sbeitzel@pobox.com&gt;
  */
 public class Config {
-    private static final Logger __l = Logger.getLogger(Config.class);
+    private static final Logger __l = LoggerFactory.getLogger(Config.class);
 
     private static final Config CURRENT_CONFIG = new Config();
 

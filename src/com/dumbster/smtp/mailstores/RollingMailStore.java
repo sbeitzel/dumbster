@@ -2,14 +2,15 @@ package com.dumbster.smtp.mailstores;
 
 import com.dumbster.smtp.MailMessage;
 import com.dumbster.smtp.MailStore;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 public class RollingMailStore implements MailStore {
-    private static final Logger __l = Logger.getLogger(RollingMailStore.class);
+    private static final Logger __l = LoggerFactory.getLogger(RollingMailStore.class);
 
 
     private List<MailMessage> receivedMail;

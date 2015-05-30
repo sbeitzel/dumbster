@@ -3,10 +3,11 @@ package com.dumbster.pop;
 import java.util.concurrent.Executors;
 
 import com.dumbster.util.Config;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class POPServerFactory {
-    private static final Logger __l = Logger.getLogger(POPServerFactory.class);
+    private static final Logger __l = LoggerFactory.getLogger(POPServerFactory.class);
 
     public static POPServer startServer() {
         POPServer server = new POPServer();

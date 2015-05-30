@@ -12,7 +12,8 @@ import java.util.regex.Pattern;
 import com.dumbster.smtp.MailMessage;
 import com.dumbster.smtp.MailStore;
 import com.dumbster.smtp.eml.EMLMailMessage;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Store messages as EML files.
@@ -20,7 +21,7 @@ import org.apache.log4j.Logger;
  * The messages are stored in order but getMessages won't return messages in the same order they were received.
  */
 public class EMLMailStore implements MailStore {
-    private static final Logger __l = Logger.getLogger(EMLMailStore.class);
+    private static final Logger __l = LoggerFactory.getLogger(EMLMailStore.class);
 
     private boolean initialized;
     private int count = 0;

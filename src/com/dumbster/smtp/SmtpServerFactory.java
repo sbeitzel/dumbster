@@ -1,7 +1,8 @@
 package com.dumbster.smtp;
 
 import com.dumbster.util.Config;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * User: rj
@@ -9,7 +10,7 @@ import org.apache.log4j.Logger;
  * Time: 6:48:14 AM
  */
 public class SmtpServerFactory {
-    private static final Logger __l = Logger.getLogger(SmtpServerFactory.class);
+    private static final Logger __l = LoggerFactory.getLogger(SmtpServerFactory.class);
 
     public static SmtpServer startServer() {
         SmtpServer server = new SmtpServer();
