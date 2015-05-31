@@ -14,29 +14,33 @@ import com.dumbster.smtp.MailMessage;
 import com.dumbster.smtp.MailMessageImpl;
 import com.dumbster.smtp.mailstores.FixedSizeMailStore;
 import com.dumbster.util.Config;
+import net.jcip.annotations.NotThreadSafe;
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 /**
  * Unit tests for the POP API to dumbster.
  */
+@NotThreadSafe
 public class POPServerTest {
     private static final int PORT = 1082;
 
-    private POPServer _server;
+    private static POPServer _server;
     
-    @Before
-    public void setup() {
+    @BeforeClass
+    public static void setup() {
         Config config = Config.getConfig();
         config.setPOP3Port(PORT);
         config.setMailStore(new FixedSizeMailStore(10));
         _server = POPServerFactory.startServer();
     }
 
-    @After
-    public void shutdown() {
+    @AfterClass
+    public static void shutdown() {
         _server.stop();
     }
 

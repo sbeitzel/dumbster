@@ -57,6 +57,7 @@ public class POPServer implements Runnable {
             if (_serverSocket != null) {
                 try {
                     _serverSocket.close();
+                    _serverSocket = null;
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -102,8 +103,10 @@ public class POPServer implements Runnable {
     public void stop() {
         _stopped = true;
         try {
-            _serverSocket.close();
-            _serverSocket = null;
+            if (_serverSocket != null) {
+                _serverSocket.close();
+                _serverSocket = null;
+            }
         } catch (IOException ignored) {
         }
     }

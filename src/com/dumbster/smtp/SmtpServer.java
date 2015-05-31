@@ -23,11 +23,14 @@ import java.util.concurrent.*;
 
 import com.dumbster.smtp.mailstores.NullMailStore;
 import com.dumbster.util.Config;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Dummy SMTP server for testing purposes.
  */
 public class SmtpServer implements Runnable {
+    private static final Logger __l = LoggerFactory.getLogger(SmtpServer.class);
 
     private volatile MailStore mailStore = new NullMailStore();
     private volatile boolean stopped = true;
@@ -65,6 +68,7 @@ public class SmtpServer implements Runnable {
             if (serverSocket != null) {
                 try {
                     serverSocket.close();
+                    serverSocket = null;
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -110,7 +114,10 @@ public class SmtpServer implements Runnable {
     public synchronized void stop() {
         stopped = true;
         try {
-            serverSocket.close();
+            if (serverSocket != null) {
+                serverSocket.close();
+                serverSocket = null;
+            }
         } catch (IOException ignored) {
         }
     }
@@ -128,15 +135,18 @@ public class SmtpServer implements Runnable {
     }
 
     public void anticipateMessageCountFor(int messageCount, int ticks) {
+        __l.trace("Want "+messageCount+" messages in "+ticks+" ticks");
         int tickdown = ticks;
         while (mailStore.getEmailCount() < messageCount && tickdown > 0) {
             tickdown--;
             try {
                 Thread.sleep(1);
             } catch (InterruptedException e) {
+                __l.debug("Interrupted");
                 return;
             }
         }
+        __l.trace("Counted down to "+tickdown);
     }
 
     /**

@@ -3,8 +3,11 @@ package com.dumbster.smtp;
 import java.io.IOException;
 
 import com.dumbster.util.AbstractSession;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ClientSession extends AbstractSession {
+    private static final Logger __l = LoggerFactory.getLogger(ClientSession.class);
 
     private MailMessage msg;
     private Response smtpResponse;
@@ -32,6 +35,7 @@ public class ClientSession extends AbstractSession {
         if (smtpResponse.getCode() > 0) {
             int code = smtpResponse.getCode();
             String message = smtpResponse.getMessage();
+            __l.trace("Responding with: " + code+" " + message);
             getOutput().print(code + " " + message + "\r\n");
             getOutput().flush();
         }
@@ -49,12 +53,15 @@ public class ClientSession extends AbstractSession {
             storeInputInMessage(request);
             sendResponse();
             updateSmtpState();
+            __l.trace("State is "+smtpState);
             saveAndRefreshMessageIfComplete();
         }
+        __l.trace("Session done. State is "+smtpState);
     }
 
     private boolean readNextLineReady() throws IOException {
         readLine();
+        __l.trace("read a line, returning "+(line!=null));
         return line != null;
     }
 
@@ -64,6 +71,10 @@ public class ClientSession extends AbstractSession {
 
     private void saveAndRefreshMessageIfComplete() {
         if (smtpState == SmtpState.QUIT) {
+            String[]  messageIDs = msg.getHeaderValues("Message-ID");
+            if (messageIDs.length == 1) {
+                __l.trace("Adding message " + messageIDs[0]);
+            }
             getMailStore().addMessage(msg);
             msg = new MailMessageImpl();
         }

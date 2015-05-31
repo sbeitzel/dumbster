@@ -29,22 +29,34 @@ import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 import java.util.Date;
 import java.util.Properties;
+import java.util.UUID;
 
 import com.dumbster.smtp.mailstores.RollingMailStore;
 import com.dumbster.util.Config;
+import net.jcip.annotations.NotThreadSafe;
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+@NotThreadSafe
 public class SmtpServerTest {
+    private static final Logger __l = LoggerFactory.getLogger(SmtpServerTest.class);
+
     private static final int SMTP_PORT = 1081;
 
-    private SmtpServer server;
+    private static SmtpServer server;
+    private static int ORIG_PORT;
+    private static MailStore ORIG_STORE;
+    private static Config CONFIG;
 
     private final String FROM = "sender@here.com";
     private final String TO = "receiver@there.com";
@@ -53,17 +65,26 @@ public class SmtpServerTest {
 
     private final int WAIT_TICKS = 10000;
 
-    @Before
-    public void setup() {
-        final Config cfg = Config.getConfig();
-        cfg.setSMTPPort(SMTP_PORT);
-        cfg.setMailStore(new RollingMailStore());
+    @BeforeClass
+    public static void setup() {
+        CONFIG = Config.getConfig();
+        ORIG_PORT = CONFIG.getSMTPPort();
+        ORIG_STORE = CONFIG.getMailStore();
+        CONFIG.setSMTPPort(SMTP_PORT);
+        CONFIG.setMailStore(new RollingMailStore());
         server = SmtpServerFactory.startServer();
     }
 
-    @After
-    public void teardown() {
+    @AfterClass
+    public static void teardown() {
         server.stop();
+        CONFIG.setMailStore(ORIG_STORE);
+        CONFIG.setSMTPPort(ORIG_PORT);
+    }
+
+    @Before
+    public void clearStore() {
+        CONFIG.getMailStore().clearMessages();
     }
 
     @Test
@@ -190,7 +211,9 @@ public class SmtpServerTest {
         multipart.addBodyPart(buildMessageBody());
         multipart.addBodyPart(buildFileAttachment());
         message.setContent(multipart);
+        __l.debug("Sending message with attachment.");
         Transport.send(message);
+        __l.debug("Sent message "+message.getMessageID());
         server.anticipateMessageCountFor(1, WAIT_TICKS);
         assertTrue(server.getMessage(0).getBody().indexOf("Apache License") > 0);
     }
@@ -198,7 +221,8 @@ public class SmtpServerTest {
     private MimeBodyPart buildFileAttachment() throws MessagingException {
         MimeBodyPart messageBodyPart = new MimeBodyPart();
         String fileName = "license.txt";
-        DataSource source = new javax.activation.FileDataSource(fileName);
+        javax.activation.FileDataSource source = new javax.activation.FileDataSource(fileName);
+        assertTrue("Unable to read the file!", source.getFile().exists() && source.getFile().canRead());
         messageBodyPart.setDataHandler(new DataHandler(source));
         messageBodyPart.setFileName(fileName);
         return messageBodyPart;
@@ -236,6 +260,7 @@ public class SmtpServerTest {
                 transport = session.getTransport("smtp");
                 String SERVER = "localhost";
                 transport.connect(SERVER, SMTP_PORT, "ddd", "ddd");
+                __l.debug("Sending two messages with login.");
                 transport.sendMessage(msg, InternetAddress.parse(TO, false));
                 transport.sendMessage(msg, InternetAddress.parse("dimiter.bakardjiev@musala.com", false));
             } catch (javax.mail.MessagingException me) {
@@ -271,7 +296,9 @@ public class SmtpServerTest {
             Session session = Session.getInstance(mailProps, null);
 
             MimeMessage msg = createMessage(session, from, to, subject, body);
+            __l.debug("Sending message");
             Transport.send(msg);
+            __l.debug("Sent message "+msg.getMessageID());
         } catch (Exception e) {
             e.printStackTrace();
             fail("Unexpected exception: " + e);
