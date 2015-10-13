@@ -15,10 +15,8 @@ import com.dumbster.smtp.MailMessageImpl;
 import com.dumbster.smtp.mailstores.FixedSizeMailStore;
 import com.dumbster.util.Config;
 import net.jcip.annotations.NotThreadSafe;
-import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
