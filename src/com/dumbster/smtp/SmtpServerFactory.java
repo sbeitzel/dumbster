@@ -1,6 +1,7 @@
 package com.dumbster.smtp;
 
-import com.dumbster.util.Config;
+import java.util.concurrent.Executors;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,9 +16,8 @@ public class SmtpServerFactory {
     public static SmtpServer startServer() {
         SmtpServer server = new SmtpServer();
         wrapInShutdownHook(server);
-        startServerThread(server);
-        __l.info("Dumbster SMTP Server started on port " + Config.getConfig().getSMTPPort() + ".\n");
-        return server;
+        Executors.newSingleThreadExecutor().execute(server);
+        return whenReady(server);
     }
 
     private static void wrapInShutdownHook(final SmtpServer server) {
@@ -30,18 +30,14 @@ public class SmtpServerFactory {
         });
     }
 
-    private static void startServerThread(SmtpServer server) {
-        new Thread(server).start();
-        int timeout = 1000;
+    private static SmtpServer whenReady(SmtpServer server) {
         while (!server.isReady()) {
             try {
                 Thread.sleep(1);
-                timeout--;
-                if (timeout < 1) {
-                    throw new RuntimeException("Server could not be started.");
-                }
-            } catch (InterruptedException ignored) {
+            } catch (InterruptedException e) {
+                __l.error("Interrupted while starting up SMTP server", e);
             }
         }
+        return server;
     }
 }

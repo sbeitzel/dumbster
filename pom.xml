@@ -53,7 +53,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <jdk_version>1.6</jdk_version>
+        <jdk_version>1.8</jdk_version>
         <project.bundle.mainclass>com.dumbster.smtp.Main</project.bundle.mainclass>
     </properties>
 
@@ -200,7 +200,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-changelog-plugin</artifactId>
-                <version>2.2</version>
+                <version>2.3</version>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

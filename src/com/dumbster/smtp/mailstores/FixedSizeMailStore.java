@@ -6,6 +6,8 @@ import java.util.List;
 import com.dumbster.smtp.MailMessage;
 import com.dumbster.smtp.MailStore;
 import org.apache.commons.configuration.AbstractConfiguration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A mail store with a fixed maximum number of messages it can hold and
@@ -13,9 +15,10 @@ import org.apache.commons.configuration.AbstractConfiguration;
  * for multithreaded access while still being reasonably fast.
  */
 public class FixedSizeMailStore implements MailStore {
-    public static final String PROP_MAXSIZE = "dumbster.FixedSizeMailStore.size";
+    private static final Logger __l = LoggerFactory.getLogger(FixedSizeMailStore.class);
+    private static final String PROP_MAXSIZE = "dumbster.FixedSizeMailStore.size";
 
-    private final List<MailMessage> _messages = new ArrayList<MailMessage>();
+    private final List<MailMessage> _messages = new ArrayList<>();
     private final int _maxSize;
 
     public FixedSizeMailStore(AbstractConfiguration config) {
@@ -35,6 +38,7 @@ public class FixedSizeMailStore implements MailStore {
 
     @Override
     public void addMessage(MailMessage message) {
+        __l.info("Message added - "+message.getFirstHeaderValue("From")+" "+message.getFirstHeaderValue("Subject"));
         // We have two operations, here. First, add the new message to the list; second, remove the other end of the list iff the list is too long
         // Because there might be multiple threads accessing this store, we need to synchronize *all* access to the list. *sigh*
         synchronized (_messages) {

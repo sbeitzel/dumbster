@@ -1,149 +1,33 @@
 package com.dumbster.pop;
 
 import java.io.IOException;
-import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.concurrent.LinkedBlockingDeque;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 
-import com.dumbster.smtp.MailStore;
-import com.dumbster.smtp.mailstores.NullMailStore;
 import com.dumbster.smtp.SocketWrapper;
+import com.dumbster.util.AbstractSocketServer;
 import com.dumbster.util.Config;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class POPServer implements Runnable {
+public class POPServer extends AbstractSocketServer {
     private static final Logger __l = LoggerFactory.getLogger(POPServer.class);
-
-    private static final int SERVER_SOCKET_TIMEOUT = 5000;
-
-    private volatile MailStore _mailstore = new NullMailStore();
-    private volatile boolean _stopped = true;
-    private volatile boolean _ready = false;
-    private volatile boolean _threaded = true;
-
-    private ServerSocket _serverSocket;
-    private int _port;
-    private ThreadPoolExecutor _executor = null;
-    private int _threadCount = 1;
 
     POPServer() {
         Config cfg = Config.getConfig();
-        _port = cfg.getPOP3Port();
-        _threadCount = cfg.getNumPOPThreads();
-        _mailstore = cfg.getMailStore();
-        _threaded = _threadCount>1;
-        // It would probably be nice if the thread factory named the threads things like, "POP thread xx"
-        _executor = new ThreadPoolExecutor(_threadCount, _threadCount, 5, TimeUnit.MILLISECONDS, new LinkedBlockingDeque<Runnable>());
-    }
-
-    public boolean isReady() {
-        return _ready;
+        setPort(cfg.getPOP3Port());
+        setThreadCount(cfg.getNumPOPThreads());
+        initExecutor();
     }
 
     @Override
-    public void run() {
-        _stopped = false;
-        try {
-            initializeServerSocket();
-            __l.info("Dumbster POP3 server started on port "+_port);
-            serverLoop();
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            _ready = false;
-            if (_serverSocket != null) {
-                try {
-                    _serverSocket.close();
-                    _serverSocket = null;
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-    }
-
-    private void initializeServerSocket() throws Exception {
-        _serverSocket = new ServerSocket(_port);
-        _serverSocket.setSoTimeout(SERVER_SOCKET_TIMEOUT);
-    }
-
-    private void serverLoop() throws IOException {
+    protected void serverLoop() throws IOException {
+        __l.info("Dumbster POP3 server started on port "+getPort());
         while (!isStopped()) {
             SocketWrapper source = new SocketWrapper(clientSocket());
-            ClientSession session = new ClientSession(source, _mailstore);
-            _executor.execute(session);
+            ClientSession session = new ClientSession(source, getMailStore());
+            getExecutor().execute(session);
         }
-        _ready = false;
+        setReady(false);
     }
 
-    private Socket clientSocket() throws IOException {
-        Socket socket = null;
-        while (socket == null) {
-            socket = accept();
-        }
-        return socket;
-    }
-
-    private Socket accept() {
-        try {
-            _ready = true;
-            return _serverSocket.accept();
-        } catch (Exception e) {
-            return null;
-        }
-    }
-
-    public boolean isStopped() {
-        return _stopped;
-    }
-
-    public void stop() {
-        _stopped = true;
-        try {
-            if (_serverSocket != null) {
-                _serverSocket.close();
-                _serverSocket = null;
-            }
-        } catch (IOException ignored) {
-        }
-    }
-
-    /**
-     * Toggles if the POP3 server is single or multi-threaded for response to
-     * POP3 sessions.
-     *
-     * @param threaded whether or not to allow multiple simultaneous connections
-     */
-    public void setThreaded(boolean threaded) {
-        /* The problem here is that we might start out as a single thread and then later get told to be multi-threaded.
-         * The solution ought to be something like, "Oh, we're switching state so we need to resize our executor's thread pool."
-         */
-        if (threaded != _threaded) {
-            // we're changing something
-            if (threaded) {
-                _executor.setMaximumPoolSize(_threadCount);
-                _executor.setCorePoolSize(_threadCount);
-            } else {
-                _executor.setCorePoolSize(1);
-                _executor.setMaximumPoolSize(1);
-            }
-            _threaded = threaded;
-        }
-    }
-
-    public void setMailStore(MailStore mailStore) {
-        _mailstore = mailStore;
-    }
-
-    /**
-     * Accessor for the mailstore. Intended to make testing easier.
-     *
-     * @return the current mailstore
-     */
-    public MailStore getMailstore() {
-        return _mailstore;
-    }
 }

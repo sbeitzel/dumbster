@@ -16,12 +16,9 @@
  */
 package com.dumbster.smtp;
 
-import java.net.ServerSocket;
-import java.net.Socket;
 import java.io.IOException;
-import java.util.concurrent.*;
 
-import com.dumbster.smtp.mailstores.NullMailStore;
+import com.dumbster.util.AbstractSocketServer;
 import com.dumbster.util.Config;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,115 +26,42 @@ import org.slf4j.LoggerFactory;
 /**
  * Dummy SMTP server for testing purposes.
  */
-public class SmtpServer implements Runnable {
+public class SmtpServer extends AbstractSocketServer {
     private static final Logger __l = LoggerFactory.getLogger(SmtpServer.class);
-
-    private volatile MailStore mailStore = new NullMailStore();
-    private volatile boolean stopped = true;
-    private volatile boolean ready = false;
-    private volatile boolean threaded = true;
-
-    private ServerSocket serverSocket;
-    private int port;
-    private ThreadPoolExecutor executor = null;
-    private int threadCount = 1;
 
     SmtpServer() {
         Config cfg = Config.getConfig();
-        this.port = cfg.getSMTPPort();
-        this.threadCount = cfg.getNumSMTPThreads();
-        this.mailStore = cfg.getMailStore();
-        this.threaded = this.threadCount>1;
-        executor = new ThreadPoolExecutor(threadCount, threadCount, 5, TimeUnit.MILLISECONDS, new LinkedBlockingDeque<Runnable>());
+        setPort(cfg.getSMTPPort());
+        setThreadCount(cfg.getNumSMTPThreads());
+        initExecutor();
     }
 
-    public boolean isReady() {
-        return ready;
-    }
-
-    @Override
-    public void run() {
-        stopped = false;
-        try {
-            initializeServerSocket();
-            serverLoop();
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            ready = false;
-            if (serverSocket != null) {
-                try {
-                    serverSocket.close();
-                    serverSocket = null;
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-    }
-
-    private void initializeServerSocket() throws Exception {
-        serverSocket = new ServerSocket(port);
-        serverSocket.setSoTimeout(Config.SERVER_SOCKET_TIMEOUT);
-    }
-
-    private void serverLoop() throws IOException {
+    protected void serverLoop() throws IOException {
+        __l.info("Dumbster SMTP server started on port "+getPort());
         while (!isStopped()) {
             SocketWrapper source = new SocketWrapper(clientSocket());
-            ClientSession session = new ClientSession(source, mailStore);
-            executor.execute(session);
+            ClientSession session = new ClientSession(source, getMailStore());
+            getExecutor().execute(session);
         }
-        ready = false;
-    }
-
-    private Socket clientSocket() throws IOException {
-        Socket socket = null;
-        while (socket == null) {
-            socket = accept();
-        }
-        return socket;
-    }
-
-    private Socket accept() {
-        try {
-            ready = true;
-            return serverSocket.accept();
-        } catch (Exception e) {
-            return null;
-        }
-    }
-
-    public boolean isStopped() {
-        return stopped;
-    }
-
-    public synchronized void stop() {
-        stopped = true;
-        try {
-            if (serverSocket != null) {
-                serverSocket.close();
-                serverSocket = null;
-            }
-        } catch (IOException ignored) {
-        }
+        setReady(false);
     }
 
     public MailMessage[] getMessages() {
-        return mailStore.getMessages();
+        return getMailStore().getMessages();
     }
 
     public MailMessage getMessage(int i) {
-        return mailStore.getMessage(i);
+        return getMailStore().getMessage(i);
     }
 
     public int getEmailCount() {
-        return mailStore.getEmailCount();
+        return getMailStore().getEmailCount();
     }
 
     public void anticipateMessageCountFor(int messageCount, int ticks) {
         __l.trace("Want "+messageCount+" messages in "+ticks+" ticks");
         int tickdown = ticks;
-        while (mailStore.getEmailCount() < messageCount && tickdown > 0) {
+        while (getMailStore().getEmailCount() < messageCount && tickdown > 0) {
             tickdown--;
             try {
                 Thread.sleep(1);
@@ -149,38 +73,8 @@ public class SmtpServer implements Runnable {
         __l.trace("Counted down to "+tickdown);
     }
 
-    /**
-     * Toggles if the SMTP server is single or multi-threaded for response to
-     * SMTP sessions.
-     *
-     * @param threaded whether or not to allow multiple simultaneous connections
-     */
-    public void setThreaded(boolean threaded) {
-        /* The problem here is that we might start out as a single thread and then later get told to be multi-threaded.
-         * The solution ought to be something like, "Oh, we're switching state so we need to resize our executor's thread pool."
-         */
-        if (threaded != this.threaded) {
-            // we're changing something
-            if (threaded) {
-                executor.setMaximumPoolSize(threadCount);
-                executor.setCorePoolSize(threadCount);
-            } else {
-                executor.setCorePoolSize(1);
-                executor.setMaximumPoolSize(1);
-            }
-            this.threaded = threaded;
-        }
-    }
-
-    public void setMailStore(MailStore mailStore) {
-        this.mailStore = mailStore;
-    }
-
     public void clearMessages() {
-        this.mailStore.clearMessages();
+        getMailStore().clearMessages();
     }
 
-    public void setPort(int port) {
-        this.port = port;
-    }
 }

@@ -2,7 +2,6 @@ package com.dumbster.pop;
 
 import java.util.concurrent.Executors;
 
-import com.dumbster.util.Config;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -13,7 +12,6 @@ public class POPServerFactory {
         POPServer server = new POPServer();
 
         wrapInShutdownHook(server);
-        __l.info("Dumbster POP3 Server started on port " + Config.getConfig().getPOP3Port() + ".\n");
         Executors.newSingleThreadExecutor().execute(server);
         return whenReady(server);
     }
@@ -23,7 +21,7 @@ public class POPServerFactory {
             try {
                 Thread.sleep(1);
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                __l.error("Interrupted while starting POP3 server", e);
             }
         }
         return server;
@@ -37,6 +35,4 @@ public class POPServerFactory {
             }
          });
     }
-
-
 }

@@ -161,7 +161,7 @@ public class SmtpServerTest {
 
     @Test
     public void testThreadedSend() {
-        server.setThreaded(true);
+        server.setThreadCount(2);
         sendMessage(SMTP_PORT, FROM, SUBJECT, BODY, TO);
         server.anticipateMessageCountFor(1, WAIT_TICKS);
         assertTrue(server.getEmailCount() == 1);

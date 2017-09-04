@@ -72,7 +72,7 @@ public class POPServerTest {
 
     @Test
     public void retrieveAndDelete() throws Exception {
-        _server.getMailstore().addMessage(createMessage("recipient@destination.net",
+        _server.getMailStore().addMessage(createMessage("recipient@destination.net",
                                                         "tester@sender.org",
                                                         "test message",
                                                         "Message body with multiple\r\nlines of text.\r\n.6 percent\r\n"));
@@ -88,12 +88,12 @@ public class POPServerTest {
         messages[0].setFlag(Flags.Flag.DELETED, true);
         inbox.close(true);
         store.close();
-        Assert.assertEquals(0, _server.getMailstore().getEmailCount());
+        Assert.assertEquals(0, _server.getMailStore().getEmailCount());
     }
     
     @Test
     public void validateByteStuffing() throws Exception {
-        _server.getMailstore().addMessage(createMessage("recipient@destination.net",
+        _server.getMailStore().addMessage(createMessage("recipient@destination.net",
                                                         "tester@sender.org",
                                                         "test message",
                                                         "Message body with multiple\r\nlines of text.\r\n.6 percent\r\n"));
@@ -113,16 +113,16 @@ public class POPServerTest {
         }
         inbox.close(true);
         store.close();
-        _server.getMailstore().clearMessages();
+        _server.getMailStore().clearMessages();
     }
 
     @Test
     public void testUIDLSingle() throws Exception {
-        _server.getMailstore().addMessage(createMessage("recipient@destination.net",
+        _server.getMailStore().addMessage(createMessage("recipient@destination.net",
                 "tester@sender.org",
                 "test message",
                 "Message body with multiple\r\nlines of text.\r\n.6 percent\r\n"));
-        _server.getMailstore().addMessage(createMessage("recipient@destination.net",
+        _server.getMailStore().addMessage(createMessage("recipient@destination.net",
                 "tester@sender.org",
                 "second test message",
                 "More email!\r\n"));
@@ -137,16 +137,16 @@ public class POPServerTest {
 
         inbox.close(true);
         store.close();
-        _server.getMailstore().clearMessages();
+        _server.getMailStore().clearMessages();
     }
 
     @Test
     public void testUIDLAll() throws Exception {
-        _server.getMailstore().addMessage(createMessage("recipient@destination.net",
+        _server.getMailStore().addMessage(createMessage("recipient@destination.net",
                 "tester@sender.org",
                 "test message",
                 "Message body with multiple\r\nlines of text.\r\n.6 percent\r\n"));
-        _server.getMailstore().addMessage(createMessage("recipient@destination.net",
+        _server.getMailStore().addMessage(createMessage("recipient@destination.net",
                 "tester@sender.org",
                 "second test message",
                 "More email!\r\n"));
@@ -163,16 +163,16 @@ public class POPServerTest {
 
         inbox.close(true);
         store.close();
-        _server.getMailstore().clearMessages();
+        _server.getMailStore().clearMessages();
     }
 
     @Test
     public void testList() throws Exception {
-        _server.getMailstore().addMessage(createMessage("recipient@destination.net",
+        _server.getMailStore().addMessage(createMessage("recipient@destination.net",
                 "tester@sender.org",
                 "test message",
                 "Message body with multiple\r\nlines of text.\r\n.6 percent\r\n"));
-        _server.getMailstore().addMessage(createMessage("recipient@destination.net",
+        _server.getMailStore().addMessage(createMessage("recipient@destination.net",
                 "tester@sender.org",
                 "second test message",
                 "More email!\r\n"));
@@ -186,7 +186,7 @@ public class POPServerTest {
 
         inbox.close(true);
         store.close();
-        _server.getMailstore().clearMessages();
+        _server.getMailStore().clearMessages();
     }
     
     private Store connect(boolean useApop) throws MessagingException {
